@@ -4,7 +4,7 @@
 // @version      2024-09-08
 // @description  try to take over the world!
 // @author       me
-// @match        https://longmeadow.powerschool.com/guardian/home.html
+// @match        https://*.powerschool.com/guardian/home.html
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=powerschool.com
 // @grant        none
 // @run-at      document-start
