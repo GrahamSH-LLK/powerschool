@@ -8,6 +8,7 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=powerschool.com
 // @grant        none
 // @run-at      document-start
+// @updateURL   https://raw.githubusercontent.com/grahamsh/powerschool/main/powerschool.user.js
 // ==/UserScript==
 function addStyle(css = "") {
   let target = document.head || document.body;
