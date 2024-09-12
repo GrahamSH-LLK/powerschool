@@ -163,8 +163,9 @@ export default async function () {
   );
   let uniqueCategories: Set<string> = new Set(allCategories);
 
-/*
+
   const targetGrade = parseInt(grade.number.replace("%", ""));
+
   const categoryGrades = [...uniqueCategories].map((category) => {
     let filteredData = assignmentData.filter(
       (assignment) =>
@@ -174,10 +175,21 @@ export default async function () {
     return {
       category: category,
       percent: getGrade(filteredData),
+      weight : 1 / uniqueCategories.size,
     };
   });
-   if ()
-   */
+  const actualGrade = getGrade(assignmentData);
+  const lower = actualGrade < targetGrade;
+    const categoryGradesSorted = categoryGrades.sort(
+      (a, b) => (lower ? a.percent - b.percent : b.percent - a.percent)
+    );
+
+  for (let [i, category] of (categoryGradesSorted).entries()) {
+    category.weight = (categoryGradesSorted.length - i + 1) * 5;
+    console.log(category);
+  }
+
+   
 
 
   tabsEl?.insertAdjacentElement("afterend", classContainer);

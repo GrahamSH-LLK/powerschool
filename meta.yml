@@ -7,3 +7,4 @@ match:
   - https://*.powerschool.com/guardian/*
   - https://powerschool.*.org/guardian/*
 updateURL: https://github.com/GrahamSH-LLK/powerschool/raw/main/dist/bundle.user.js
+run-at: document-start

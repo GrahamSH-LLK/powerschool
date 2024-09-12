@@ -1,4 +1,3 @@
-
 import typescript from "@rollup/plugin-typescript";
 import url from "@rollup/plugin-url";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
@@ -9,16 +8,22 @@ import metablock from "rollup-plugin-userscript-metablock";
 export default {
   input: "src/index.ts",
 
-  output: {
-    file: "dist/bundle.user.js",
-    format: "esm",
-    plugins: [
-      metablock({
-        file: "meta.yml",
-      }),
-    ],
-    
-  },
+  output: [
+    {
+      file: "dist/bundle.user.js",
+      format: "esm",
+      plugins: [
+        metablock({
+          file: "meta.yml",
+        }),
+      ],
+    },
+    {
+      file: "dist/bundle.js",
+      format: "esm", 
+      
+    }
+  ],
 
   plugins: [
     typescript(),
