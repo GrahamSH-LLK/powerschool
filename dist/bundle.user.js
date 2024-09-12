@@ -5,7 +5,7 @@
 // @version     1.0.0
 // @match       https://*.powerschool.com/guardian/*
 // @match       https://powerschool.*.org/guardian/*
-// @updateURL   https://raw.githubusercontent.com/grahamsh-llk/powerschool/main/dist/bundle.user.js
+// @updateURL   https://github.com/GrahamSH-LLK/powerschool/raw/main/dist/bundle.user.js
 // @grant       none
 // ==/UserScript==
 
