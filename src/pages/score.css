@@ -70,3 +70,16 @@ table {
     }
     
 }
+
+.class-table-nothing {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10rem;
+  width: 100%;
+  font-size: 1.5rem;
+  color: rgb(100 116 139);
+}
+div.table-container tr:has(.class-table-nothing):hover {
+  background: revert!important;
+}

@@ -37,21 +37,30 @@ export default async function () {
     .split(" = ")[1]
     .replaceAll("'", "")
     .replace("001", "");
-  const begDate = new Date(ngData[1].trim().split(" = ")[1].replaceAll("'", ""))
-    .toISOString()
+  let begDate;
+  let endDate;
+  let code = new URLSearchParams(window.location.search).get("fg");;
+  try {
+   begDate = new Date(ngData[1].trim().split(" = ")[1].replaceAll("'", ""))
+    ?.toISOString()
     .split("T")[0];
-  const endDate = new Date(ngData[2].trim().split(" = ")[1].replaceAll("'", ""))
-    .toISOString()
+   endDate = new Date(ngData[2].trim().split(" = ")[1].replaceAll("'", ""))
+    ?.toISOString()
     .split("T")[0];
+  } catch (e) {
+    console.error(e);
+  }
   const getAssignmentData = async () => {
     const res = await fetch(
-      `https://longmeadow.powerschool.com/ws/xte/assignment/lookup?_=${Date.now()}`, // i think it's a cache buster
+      `${
+        window.location.origin
+      }/ws/xte/assignment/lookup?_=${Date.now()}`, // i think it's a cache buster
       {
         headers: {
           accept: "application/json, text/plain, */*",
           "content-type": "application/json;charset=UTF-8",
         },
-        body: `{"section_ids":[${sectionId}],"student_ids":[${studentId}],"start_date":"${begDate}","end_date":"${endDate}"}`,
+        body: JSON.stringify({"section_ids":[sectionId],"student_ids":[studentId],"start_date":begDate,"end_date":endDate, store_codes: [code]}),
         method: "POST",
         credentials: "include",
       }
@@ -293,7 +302,20 @@ const renderTable = (assignmentData: any) => {
     `;
     tbody.appendChild(tr);
   }
+  if (!assignmentData.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = headers.length;
+    tr.appendChild(td);
 
+
+    const nothingHere = Object.assign(document.createElement("div"), {
+      className: "class-table-nothing",
+    });
+    nothingHere.textContent = "No assignments yet!";
+    td.appendChild(nothingHere);
+    tbody.appendChild(tr);
+  }
   let tableContainer = document.querySelector(".table-container");
   tableContainer.innerHTML = "";
   tableContainer.appendChild(table);

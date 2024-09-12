@@ -23,7 +23,7 @@ export default {
   plugins: [
     typescript(),
     nodeResolve(),
-    //terser(),
+    terser(),
     css(),
     url({
       emitFiles: false,
