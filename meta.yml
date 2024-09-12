@@ -1,0 +1,9 @@
+name: PowerSchool Revamped
+description:
+  default: Revamps the PowerSchool interface to be more modern and user-friendly.
+namespace: https://grahamsh.com/
+version: '1.0.0'
+match: 
+  - https://*.powerschool.com/guardian/*
+  - https://powerschool.*.org/guardian/*
+updateURL: https://raw.githubusercontent.com/grahamsh-llk/powerschool/main/dist/bundle.user.js

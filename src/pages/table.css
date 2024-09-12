@@ -1,0 +1,44 @@
+div.table-container {
+  border-radius: 10px;
+  margin-top: 10px;
+  border: rgb(226, 232, 240) 1px solid;
+  overflow: hidden;
+
+  & > table {
+    margin: 0 !important;
+    width: 100%;
+    & tbody tr {
+      background-color: initial !important;
+      border-bottom: rgb(226, 232, 240) 1.5px solid;
+      &:hover {
+        background-color: rgb(248, 250, 252)!important;
+      }
+    }
+    & td,
+    th {
+      color: rgb(100 116 139);
+      padding-bottom: 0.875rem;
+      padding-top: 0.875rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      background-color: initial !important;
+    }
+
+    & thead {
+      border-bottom: rgb(226, 232, 240) 1.5px solid;
+      th,
+      tr {
+        font-size: 14px;
+        font-weight: 600;
+        background-color: initial !important;
+        color: rgb(15, 23, 42);
+      }
+    }
+  }
+}
+
+@media (screen and max-width: 768px) {
+  div.table-container {
+    overflow-x: auto;
+  }
+}

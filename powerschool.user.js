@@ -18,8 +18,132 @@ function addStyle(css = "") {
   style.innerHTML = css;
   target.append(style);
 }
+const pSBC = (p, c0, c1, l) => {
+  let pSBCr = null;
+  let r,
+    g,
+    b,
+    P,
+    f,
+    t,
+    h,
+    i = parseInt,
+    m = Math.round,
+    a = typeof c1 == "string";
+  if (
+    typeof p != "number" ||
+    p < -1 ||
+    p > 1 ||
+    typeof c0 != "string" ||
+    (c0[0] != "r" && c0[0] != "#") ||
+    (c1 && !a)
+  )
+    return null;
+  if (!pSBCr)
+    pSBCr = (d) => {
+      let n = d.length,
+        x = {};
+      if (n > 9) {
+        ([r, g, b, a] = d = d.split(",")), (n = d.length);
+        if (n < 3 || n > 4) return null;
+        (x.r = i(r[3] == "a" ? r.slice(5) : r.slice(4))),
+          (x.g = i(g)),
+          (x.b = i(b)),
+          (x.a = a ? parseFloat(a) : -1);
+      } else {
+        if (n == 8 || n == 6 || n < 4) return null;
+        if (n < 6)
+          d =
+            "#" +
+            d[1] +
+            d[1] +
+            d[2] +
+            d[2] +
+            d[3] +
+            d[3] +
+            (n > 4 ? d[4] + d[4] : "");
+        d = i(d.slice(1), 16);
+        if (n == 9 || n == 5)
+          (x.r = (d >> 24) & 255),
+            (x.g = (d >> 16) & 255),
+            (x.b = (d >> 8) & 255),
+            (x.a = m((d & 255) / 0.255) / 1000);
+        else
+          (x.r = d >> 16), (x.g = (d >> 8) & 255), (x.b = d & 255), (x.a = -1);
+      }
+      return x;
+    };
+  (h = c0.length > 9),
+    (h = a ? (c1.length > 9 ? true : c1 == "c" ? !h : false) : h),
+    (f = pSBCr(c0)),
+    (P = p < 0),
+    (t =
+      c1 && c1 != "c"
+        ? pSBCr(c1)
+        : P
+        ? { r: 0, g: 0, b: 0, a: -1 }
+        : { r: 255, g: 255, b: 255, a: -1 }),
+    (p = P ? p * -1 : p),
+    (P = 1 - p);
+  if (!f || !t) return null;
+  if (l)
+    (r = m(P * f.r + p * t.r)),
+      (g = m(P * f.g + p * t.g)),
+      (b = m(P * f.b + p * t.b));
+  else
+    (r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5)),
+      (g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5)),
+      (b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5));
+  (a = f.a),
+    (t = t.a),
+    (f = a >= 0 || t >= 0),
+    (a = f ? (a < 0 ? t : t < 0 ? a : a * P + t * p) : 0);
+  if (h)
+    return (
+      "rgb" +
+      (f ? "a(" : "(") +
+      r +
+      "," +
+      g +
+      "," +
+      b +
+      (f ? "," + m(a * 1000) / 1000 : "") +
+      ")"
+    );
+  else
+    return (
+      "#" +
+      (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0))
+        .toString(16)
+        .slice(1, f ? undefined : -2)
+    );
+};
 
-addStyle`
+// create gradient for each subject
+const gradients = subjects.map((subject, i) => {
+  const color = colors[i];
+  const gradient = `linear-gradient(135deg, ${pSBC(-0.2, color)} 0%, ${pSBC(
+    0.1,
+    color
+  )} 50%,  ${pSBC(0.15, color)} 100%)`;
+  return gradient;
+});
+const urls = subjects.map(
+  (subject) =>
+    `https://gh.grahamsh.com/empty/pscat/class-category-${subject}115x155@3x.png`
+);
+// promise.all fetch and turn into data url
+
+
+
+const page = window.location.href.includes("home.html")
+  ? "home"
+  : window.location.href.includes("scores.html")
+  ? "scores"
+  : "other";
+
+if (page == "home") {
+  addStyle`
     .box-round:has(#quickLookup), #legend {
         display: none!important;
     }
@@ -80,6 +204,7 @@ addStyle`
     .teacher {
         font-size: 0.75rem;
         color: #666;
+        margin: 0;
     }
     #timescale {
         margin-right: 1rem;
@@ -144,118 +269,9 @@ addStyle`
     
     `;
 
-document.addEventListener("DOMContentLoaded", async function () {
+  //document.addEventListener("DOMContentLoaded", async function () {
   (async function () {
     "use strict";
-    const pSBC = (p, c0, c1, l) => {
-      let pSBCr = null;
-      let r,
-        g,
-        b,
-        P,
-        f,
-        t,
-        h,
-        i = parseInt,
-        m = Math.round,
-        a = typeof c1 == "string";
-      if (
-        typeof p != "number" ||
-        p < -1 ||
-        p > 1 ||
-        typeof c0 != "string" ||
-        (c0[0] != "r" && c0[0] != "#") ||
-        (c1 && !a)
-      )
-        return null;
-      if (!pSBCr)
-        pSBCr = (d) => {
-          let n = d.length,
-            x = {};
-          if (n > 9) {
-            ([r, g, b, a] = d = d.split(",")), (n = d.length);
-            if (n < 3 || n > 4) return null;
-            (x.r = i(r[3] == "a" ? r.slice(5) : r.slice(4))),
-              (x.g = i(g)),
-              (x.b = i(b)),
-              (x.a = a ? parseFloat(a) : -1);
-          } else {
-            if (n == 8 || n == 6 || n < 4) return null;
-            if (n < 6)
-              d =
-                "#" +
-                d[1] +
-                d[1] +
-                d[2] +
-                d[2] +
-                d[3] +
-                d[3] +
-                (n > 4 ? d[4] + d[4] : "");
-            d = i(d.slice(1), 16);
-            if (n == 9 || n == 5)
-              (x.r = (d >> 24) & 255),
-                (x.g = (d >> 16) & 255),
-                (x.b = (d >> 8) & 255),
-                (x.a = m((d & 255) / 0.255) / 1000);
-            else
-              (x.r = d >> 16),
-                (x.g = (d >> 8) & 255),
-                (x.b = d & 255),
-                (x.a = -1);
-          }
-          return x;
-        };
-      (h = c0.length > 9),
-        (h = a ? (c1.length > 9 ? true : c1 == "c" ? !h : false) : h),
-        (f = pSBCr(c0)),
-        (P = p < 0),
-        (t =
-          c1 && c1 != "c"
-            ? pSBCr(c1)
-            : P
-            ? { r: 0, g: 0, b: 0, a: -1 }
-            : { r: 255, g: 255, b: 255, a: -1 }),
-        (p = P ? p * -1 : p),
-        (P = 1 - p);
-      if (!f || !t) return null;
-      if (l)
-        (r = m(P * f.r + p * t.r)),
-          (g = m(P * f.g + p * t.g)),
-          (b = m(P * f.b + p * t.b));
-      else
-        (r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5)),
-          (g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5)),
-          (b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5));
-      (a = f.a),
-        (t = t.a),
-        (f = a >= 0 || t >= 0),
-        (a = f ? (a < 0 ? t : t < 0 ? a : a * P + t * p) : 0);
-      if (h)
-        return (
-          "rgb" +
-          (f ? "a(" : "(") +
-          r +
-          "," +
-          g +
-          "," +
-          b +
-          (f ? "," + m(a * 1000) / 1000 : "") +
-          ")"
-        );
-      else
-        return (
-          "#" +
-          (
-            4294967296 +
-            r * 16777216 +
-            g * 65536 +
-            b * 256 +
-            (f ? m(a * 255) : 0)
-          )
-            .toString(16)
-            .slice(1, f ? undefined : -2)
-        );
-    };
     const timescales = Array.from(
       document
         .querySelector("#quickLookup")
@@ -266,47 +282,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       .map((td) => td.textContent);
     let currTimescale = timescales[0];
 
-    let subjects = [
-      "math",
-      "science",
-      "languagearts",
-      "socstudies",
-      "foreignlang",
-      "arts",
-      "pe",
-      "studyhall",
-      "other",
-    ];
-    let colors = [
-      "#02817F",
-      "#C15103",
-      "#6B3B85",
-      "#027BBA",
-      "#C21572",
-      "#C21572",
-      "#C41230",
-      "#0F1187",
-      "#627833",
-    ];
-    // create gradient for each subject
-    const gradients = subjects.map((subject, i) => {
-      const color = colors[i];
-      const gradient = `linear-gradient(135deg, ${pSBC(-0.2, color)} 0%, ${pSBC(
-        0.1,
-        color
-      )} 50%,  ${pSBC(0.15, color)} 100%)`;
-      return gradient;
-    });
-    const urls = subjects.map(
-      (subject) =>
-        `https://gh.grahamsh.com/empty/pscat/class-category-${subject}115x155@3x.png`
-    );
-    // promise.all fetch and turn into data url
-    const fetches = urls.map((url) =>
-      fetch(url).then((response) => response.blob())
-    );
-    const blobs = await Promise.all(fetches);
-    const dataUrls = blobs.map((blob) => URL.createObjectURL(blob));
     const attendanceTable = document.querySelector("#quickLookup  tbody");
     const attendanceRows = attendanceTable.querySelectorAll(
       "tr:not(.th2):not(:has(#attTotal))"
@@ -430,40 +405,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       const classData = row.querySelector("td:nth-child(12)");
       const className = classData.childNodes[0].textContent;
       const teacher = classData.childNodes[4].textContent.split("Email ")[1];
-      const room = classData.childNodes[6].textContent.split("Rm: ")[1];
+      const room =
+        classData.childNodes[6].textContent.split("Rm: ")[1] ||
+        classData.childNodes[6].textContent.split("Rm: ")[1];
 
       // next 9 tds are the grades
       // q1, q2,e1, s1,q3, q4,e2, s2, final
-
-      let keywords = {
-        algebra: "math",
-        geometry: "math",
-        calc: "math",
-        trig: "math",
-        art: "arts",
-        wellness: "pe",
-        health: "pe",
-        ice: "studyhall",
-        history: "socstudies",
-        english: "languagearts",
-        language: "languagearts",
-        spanish: "foreignlang",
-        french: "foreignlang",
-        latin: "foreignlang",
-        biology: "science",
-        chemistry: "science",
-        physics: "science",
-        environmental: "science",
-        computer: "math",
-      };
-      const keywordToSubject = (keyword) => {
-        for (let [key, value] of Object.entries(keywords)) {
-          if (keyword.toLowerCase().includes(key)) {
-            return value;
-          }
-        }
-        return "other";
-      };
 
       let grades = Array.from(row.querySelectorAll("td"))
         .slice(12, 21)
@@ -611,18 +558,30 @@ document.addEventListener("DOMContentLoaded", async function () {
             textContent: data.className,
           })
         );
-        mid.appendChild(
-          Object.assign(document.createElement("span"), {
+        const leftContainer = Object.assign(document.createElement("div"), {});
+        leftContainer.appendChild(
+          Object.assign(document.createElement("p"), {
+            textContent: "Room " + data.room,
+            className: "teacher",
+          })
+        );
+        leftContainer.appendChild(
+          Object.assign(document.createElement("p"), {
             textContent: data.teacher,
             className: "teacher",
           })
         );
+        mid.appendChild(leftContainer);
         const footer = Object.assign(document.createElement("div"), {
           className: "card-footer card-item",
         });
         footer.appendChild(
           Object.assign(document.createElement("span"), {
-            textContent: `Room ${data.room}`,
+            textContent: `${
+              data.attendance.filter((x) => {
+                x == "Absent";
+              }).length
+            } recent absences`,
           })
         );
         const viewButton = Object.assign(document.createElement("button"), {});
@@ -648,16 +607,234 @@ document.addEventListener("DOMContentLoaded", async function () {
         card.appendChild(footer);
 
         cardContainer.appendChild(card);
-      }
+      } //beer
     };
     // inject css
-    for (let i = 0; i < subjects.length; i++) {
-      addStyle(`
-        .card-header[data-subject="${subjects[i]}"] {
-            background-image: url(${dataUrls[i]}), ${gradients[i]};
-        }
-        `);
-    }
     render();
   })();
-});
+  //});
+}
+
+if (page == "scores") {
+  addStyle`
+
+  .box-round:has(.linkDescList), #legend {
+    display: none;
+  }
+    .class-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow:1;
+    padding: 1rem;
+    }
+    .class-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: left;
+        padding: 1rem;
+        background-color: #f0f0f0;
+        border-radius: 10px 10px 0 0;
+        width: calc(100%-20px);
+        min-height: 8rem;
+        background-size: 40%,cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        flex-direction: column;
+
+    }
+    #content {
+    display: flex!important;
+    }
+    #nav-main {
+    flex-grow: 0!important;
+    }
+    #content-main {
+    flex-grow: 1;
+    }
+    .class-header-top-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+    }
+    .class-info-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    }
+    .class-lettergrade {
+    font-size: 1.5rem;
+    color: white;
+    }
+    .class-header-bottom {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        padding-left: 2rem;
+        background-color: #fff;
+        border-radius: 0 0 10px 10px;
+        filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));
+    }
+    
+
+    `;
+  const sectionId = document
+    .querySelector("[data-sectionid]")
+    .getAttribute("data-sectionid");
+  const ngData = document
+    .querySelector("[data-ng-init]")
+    .getAttribute("data-ng-init")
+    .split(";");
+  const studentId = ngData[0]
+    .trim()
+    .split(" = ")[1]
+    .replaceAll("'", "")
+    .replace("001", "");
+  const begDate = new Date(ngData[1].trim().split(" = ")[1].replaceAll("'", ""))
+    .toISOString()
+    .split("T")[0];
+  const endDate = new Date(ngData[2].trim().split(" = ")[1].replaceAll("'", ""))
+    .toISOString()
+    .split("T")[0];
+  const getAssignmentData = async () => {
+    const res = await fetch(
+      `https://longmeadow.powerschool.com/ws/xte/assignment/lookup?_=${Date.now()}`, // i think it's a cache buster
+      {
+        headers: {
+          accept: "application/json, text/plain, */*",
+          "content-type": "application/json;charset=UTF-8",
+        },
+        body: `{"section_ids":[${sectionId}],"student_ids":[${studentId}],"start_date":"${begDate}","end_date":"${endDate}"}`,
+        method: "POST",
+        credentials: "include",
+      }
+    );
+    return await res.json();
+  };
+
+  //document.addEventListener("DOMContentLoaded", async function () {
+  const assignmentData = await getAssignmentData();
+
+  const classInfoContainer = document.querySelector(
+    ".linkDescList > tbody > tr:nth-child(2)"
+  );
+  const className =
+    classInfoContainer.querySelector("td:nth-child(1)").textContent;
+  const teacher =
+    classInfoContainer.querySelector("td:nth-child(2)").textContent;
+  const expression =
+    classInfoContainer.querySelector("td:nth-child(3)").textContent;
+  const term = classInfoContainer.querySelector("td:nth-child(4)").textContent;
+  const gradeContainer = classInfoContainer.querySelector("td:nth-child(5)");
+  const grade = {
+    letterGrade: gradeContainer.childNodes[0].textContent.trim(),
+
+    number: gradeContainer.childNodes[2].textContent.trim(),
+  };
+  const comment = document.querySelector(".comment").textContent;
+  const sectionDescription = document.querySelector(
+    ".comment:nth-of-type(2)"
+  ).textContent;
+  const classContainer = Object.assign(document.createElement("div"), {
+    className: "class-container",
+  });
+
+  const header = Object.assign(document.createElement("div"), {
+    className: "class-header",
+  });
+
+  const headerTop = Object.assign(document.createElement("div"), {
+    className: "class-header-top",
+  });
+  headerTop.setAttribute("data-subject", keywordToSubject(className));
+  headerTop.append(
+    Object.assign(document.createElement("div"), {
+      className: "class-header-top-title",
+      textContent: "",
+    })
+  );
+  const headerBottom = Object.assign(document.createElement("div"), {
+    className: "class-header-bottom",
+  });
+  headerBottom.appendChild(
+    Object.assign(document.createElement("div"), {
+      textContent: teacher,
+      className: "class-teacher",
+    })
+  );
+
+  const infoContainer = Object.assign(document.createElement("div"), {
+    className: "class-info-container",
+  });
+  infoContainer.appendChild(
+    Object.assign(document.createElement("div"), {
+      textContent: className,
+      className: "class-header-top-title ",
+    })
+  );
+
+  infoContainer.appendChild(
+    Object.assign(document.createElement("div"), {
+      textContent: grade.letterGrade + " | " + grade.number,
+      className: "class-lettergrade",
+    })
+  );
+  headerTop.appendChild(infoContainer);
+  header.appendChild(headerTop);
+  header.appendChild(headerBottom);
+  classContainer.appendChild(header);
+  const tabsEl = document.querySelector(".tabs");
+  console.log("huhh");
+  tabsEl.insertAdjacentElement("afterend", classContainer);
+  // create table
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  const headerRow = document.createElement("tr");
+
+  const headers = [
+    "Due Date",
+    "Assignment",
+    "Category",
+    "Score",
+    "Total",
+    "Percent",
+    "Letter Grade",
+    "Comment",
+  ];
+  for (let header of headers) {
+    const th = document.createElement("th");
+    th.textContent = header;
+    headerRow.appendChild(th);
+  }
+  thead.appendChild(headerRow);
+
+  for (let assignment of assignmentData) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+    <td>${assignment._assignmentsections[0].duedate}</td>
+    <td>${assignment._assignmentsections[0].name}</td>
+    <td>${
+      assignment._assignmentsections[0]._assignmentcategoryassociations[0]
+        ._teachercategory.name
+    }</td>
+    <td>${
+      assignment._assignmentsections[0]._assignmentscores[0]?.scorepoints ??
+      "--"
+    } / ${assignment._assignmentsections[0].scoreentrypoints}</td>
+    <td>${assignment.assignment_total}</td>
+    <td>${
+      assignment._assignmentsections[0]._assignmentscores[0]?.scorepercent
+    }%</td>
+    <td>${assignment.assignment_letter_grade}</td>
+    <td>${assignment.assignment_comment}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+  const tableContainer = document.createElement("div");
+  tableContainer.appendChild(table);
+  classContainer.appendChild(tableContainer);
+
+  //});
+}

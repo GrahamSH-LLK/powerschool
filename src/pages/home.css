@@ -1,0 +1,124 @@
+    .box-round:has(#quickLookup), #legend {
+        display: none!important;
+    }
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        /*justify-content: center;*/
+        padding: 0.5rem;
+    }
+    .card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        display: flex;
+        flex-direction: column;
+        color: inherit;
+    }
+    .card-header {
+        background-color: #f0f0f0;
+        height: 4rem;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 2rem;
+        background-size: 40%,cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: white;
+        padding-top: 0rem!important;
+    
+    }
+    .card-header-top {
+        width: 100%;
+        display: flex;
+        justify-content: end;
+        font-size: 0.75rem;
+        padding-bottom: 0.3rem
+        min-height: 21px;
+    }
+    .card-item {
+        padding: 1rem;
+    }
+    .card-mid {
+        background-color: white;
+        border-radius: 0 0 10px 10px;
+        display: flex;
+        flex-direction: column;
+        font-size: 1rem;
+        justify-content: space-between;
+        min-height: 74px;
+    }
+    
+    .teacher {
+        font-size: 0.75rem;
+        color: #666;
+        margin: 0;
+    }
+    #timescale {
+        margin-right: 1rem;
+        border-radius: 8px;
+        height: 30px;
+        float:right;
+    }
+    .tabs {
+        position: relative;
+    }
+    .card-footer {
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .card-footer button {
+        background: transparent;
+        color: #666;
+    }
+    .card-footer button div:has(svg) {
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+    .modal-bg {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .close {
+        position: absolute;
+        right: 0;
+        top: 0;
+        background: transparent!important;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666!important;
+        padding: 0.5rem;
+        cursor:pointer;
+    }
+    .close svg {
+        height: 1rem;
+        width: 1rem;
+    }

@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "lib": ["es2021", "dom"], "target": "es2021" },
+  "downlevelIteration": true
+}
