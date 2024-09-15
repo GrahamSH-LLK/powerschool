@@ -1,10 +1,11 @@
+@import url("/src/assets/inter/inter.css");
+
 .box-round:has(#quickLookup),
 .box-round:has(.linkDescList),
 #legend {
   display: none !important;
 }
 
-@import "https://rsms.me/inter/inter.css";
 div#header {
   display: flex;
   justify-content: space-between;
@@ -22,12 +23,12 @@ ul#tools {
 }
 
 * {
-  font-family: "Inter", sans-serif !important;
+  font-family: "Inter", system-ui, sans-serif !important;
 }
 
 @supports (font-variation-settings: normal) {
   * {
-    font-family: "Inter var" !important;
+    font-family: "Inter var", system-ui, sans-serif !important;
   }
 }
 

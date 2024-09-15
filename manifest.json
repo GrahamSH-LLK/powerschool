@@ -6,6 +6,12 @@
   "icons": {
     "128": "src/assets/logo-128.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/assets/inter/inter.css"],
+      "matches": ["https://*.powerschool.com/*"]
+    }
+  ],
 
   "content_scripts": [
     {
