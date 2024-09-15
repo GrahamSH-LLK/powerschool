@@ -2,6 +2,7 @@ import { addStyle, keywordToSubject } from "../utils";
 import { format } from "date-fns";
 import styles from "./score.css";
 import tableStyles from "./table.css";
+const gradeOverrides = {};
 const numberToColor = (num: number | string) => {
   if (typeof num === "string") {
     num = parseInt(num);
@@ -39,28 +40,32 @@ export default async function () {
     .replace("001", "");
   let begDate;
   let endDate;
-  let code = new URLSearchParams(window.location.search).get("fg");;
+  let code = new URLSearchParams(window.location.search).get("fg");
   try {
-   begDate = new Date(ngData[1].trim().split(" = ")[1].replaceAll("'", ""))
-    ?.toISOString()
-    .split("T")[0];
-   endDate = new Date(ngData[2].trim().split(" = ")[1].replaceAll("'", ""))
-    ?.toISOString()
-    .split("T")[0];
+    begDate = new Date(ngData[1].trim().split(" = ")[1].replaceAll("'", ""))
+      ?.toISOString()
+      .split("T")[0];
+    endDate = new Date(ngData[2].trim().split(" = ")[1].replaceAll("'", ""))
+      ?.toISOString()
+      .split("T")[0];
   } catch (e) {
     console.error(e);
   }
   const getAssignmentData = async () => {
     const res = await fetch(
-      `${
-        window.location.origin
-      }/ws/xte/assignment/lookup?_=${Date.now()}`, // i think it's a cache buster
+      `${window.location.origin}/ws/xte/assignment/lookup?_=${Date.now()}`, // i think it's a cache buster
       {
         headers: {
           accept: "application/json, text/plain, */*",
           "content-type": "application/json;charset=UTF-8",
         },
-        body: JSON.stringify({"section_ids":[sectionId],"student_ids":[studentId],"start_date":begDate,"end_date":endDate, store_codes: [code]}),
+        body: JSON.stringify({
+          section_ids: [sectionId],
+          student_ids: [studentId],
+          start_date: begDate,
+          end_date: endDate,
+          store_codes: [code],
+        }),
         method: "POST",
         credentials: "include",
       }
@@ -135,34 +140,35 @@ export default async function () {
     })
   );
   const percent = getGrade(assignmentData).toFixed(0);
-  
+
   infoContainer.appendChild(
     Object.assign(document.createElement("div"), {
       textContent: grade.letterGrade + " | " + grade.number,
       className: "class-lettergrade",
     })
   );
-    headerBottom.appendChild(
-      Object.assign(document.createElement("div"), {
-        textContent: percent + "%" !== grade.number ? "Grade calculated by category weight": "Grade calculated by total points",
-        className: "class-percent",
-      })
-    );
-    
-  
+  headerBottom.appendChild(
+    Object.assign(document.createElement("div"), {
+      textContent:
+        percent + "%" !== grade.number
+          ? "Grade calculated by category weight"
+          : "Grade calculated by total points",
+      className: "class-percent",
+    })
+  );
+
   headerTop.appendChild(infoContainer);
   header.appendChild(headerTop);
   header.appendChild(headerBottom);
   classContainer.appendChild(header);
   const tabsEl = document.querySelector(".tabs");
   console.log("huhh");
-    let allCategories: string[] = assignmentData.map(
+  let allCategories: string[] = assignmentData.map(
     (assignment) =>
       assignment._assignmentsections[0]._assignmentcategoryassociations[0]
         ._teachercategory.name
   );
   let uniqueCategories: Set<string> = new Set(allCategories);
-
 
   const targetGrade = parseInt(grade.number.replace("%", ""));
 
@@ -175,22 +181,19 @@ export default async function () {
     return {
       category: category,
       percent: getGrade(filteredData),
-      weight : 1 / uniqueCategories.size,
+      weight: 1 / uniqueCategories.size,
     };
   });
   const actualGrade = getGrade(assignmentData);
   const lower = actualGrade < targetGrade;
-    const categoryGradesSorted = categoryGrades.sort(
-      (a, b) => (lower ? a.percent - b.percent : b.percent - a.percent)
-    );
+  const categoryGradesSorted = categoryGrades.sort((a, b) =>
+    lower ? a.percent - b.percent : b.percent - a.percent
+  );
 
-  for (let [i, category] of (categoryGradesSorted).entries()) {
+  for (let [i, category] of categoryGradesSorted.entries()) {
     category.weight = (categoryGradesSorted.length - i + 1) * 5;
     console.log(category);
   }
-
-   
-
 
   tabsEl?.insertAdjacentElement("afterend", classContainer);
   // create table
@@ -213,7 +216,7 @@ export default async function () {
     const letterGradeContainer = document.querySelector(".class-lettergrade");
 
     if ((e.target as HTMLSelectElement).value === "All") {
-        letterGradeContainer.innerHTML = `${grade.letterGrade} | ${grade.number}`;
+      renderGrade(assignmentData);
       return renderTable(assignmentData);
     }
     let filteredData = assignmentData.filter(
@@ -224,11 +227,7 @@ export default async function () {
     //
     renderTable(filteredData);
 
-    const percent = getGrade(filteredData);
-    const letterGrade = getLetterGrade(percent);
-    letterGradeContainer.innerHTML = `${
-      (e.target as HTMLSelectElement).value
-    }: ${letterGrade} | ${percent.toFixed(0)}%`;
+    renderGrade(assignmentData);
   });
   toolbar.appendChild(categoryDropdown);
   classContainer.appendChild(toolbar);
@@ -238,6 +237,24 @@ export default async function () {
   classContainer.appendChild(tableContainer);
   renderTable(assignmentData);
 }
+const renderGrade = (assignmentData) => {
+  const select: HTMLSelectElement = document.querySelector(".toolbar select");
+  const letterGradeContainer = document.querySelector(".class-lettergrade");
+  let assignments =
+    select.value === "All"
+      ? assignmentData
+      : assignmentData.filter(
+          (assignment) =>
+            assignment._assignmentsections[0]._assignmentcategoryassociations[0]
+              ._teachercategory.name === select.value
+        );
+  const percent = getGrade(assignments);
+  const letterGrade = getLetterGrade(percent);
+
+  letterGradeContainer.innerHTML = `${
+    select.value == "All" ? "" : select.value + ": "
+  }${letterGrade} | ${percent.toFixed(0)}%`;
+};
 const renderTable = (assignmentData: any) => {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
@@ -279,6 +296,15 @@ const renderTable = (assignmentData: any) => {
       (flag) => assignment._assignmentsections[0]._assignmentscores[0]?.[flag]
     );
     const flagString = activeFlags.map((flag) => flags[flag]).join(", ");
+    const scorePoints = gradeOverrides[assignment._assignmentsections[0].assignmentsectionid] ?? assignment._assignmentsections[0]._assignmentscores[0]?.scorePoints;
+    const number = getGrade([assignment]);
+    console.log('number is', number);
+    const grade = {
+      number: isNaN(number) ? '--' : number,
+      letterGrade: !isNaN(number) ? getLetterGrade(number) : "--",
+
+    }
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
     <td>${format(
@@ -293,25 +319,29 @@ const renderTable = (assignmentData: any) => {
       assignment._assignmentsections[0]._assignmentcategoryassociations[0]
         ._teachercategory.name
     }</td>
-    <td>${
-      assignment._assignmentsections[0]._assignmentscores[0]?.scorepoints ??
-      "--"
-    } / ${assignment._assignmentsections[0].scoreentrypoints}</td>
+    <td><span class="points">${
+      scorePoints 
+    }</span> / ${assignment._assignmentsections[0].scoreentrypoints}</td>
     <td>${flagString}</td>
+    <td>${grade.number}%</td>
     <td>${
-      assignment._assignmentsections[0]._assignmentscores[0]?.scorepercent?.toFixed(
-        2
-      ) ?? "--"
-    }%</td>
-    <td>${
-      assignment._assignmentsections[0]._assignmentscores[0]
-        ?.scorelettergrade || "--"
+      grade.letterGrade || "--"
     }</td>
     <td>${
       assignment._assignmentsections[0]._assignmentscores[0]
         ?._assignmentscorecomment?.commentvalue || ""
     }</td>
     `;
+    tr.querySelector(".points")?.addEventListener("click", () => {
+      const newScore = prompt("Enter new score");
+      if (!newScore) return;
+      gradeOverrides[assignment._assignmentsections[0].assignmentsectionid] =
+        parseInt(newScore);
+      console.log(gradeOverrides);
+      renderGrade(assignmentData);
+      renderTable(assignmentData);
+    });
+
     tbody.appendChild(tr);
   }
   if (!assignmentData.length) {
@@ -319,7 +349,6 @@ const renderTable = (assignmentData: any) => {
     const td = document.createElement("td");
     td.colSpan = headers.length;
     tr.appendChild(td);
-
 
     const nothingHere = Object.assign(document.createElement("div"), {
       className: "class-table-nothing",
@@ -332,7 +361,6 @@ const renderTable = (assignmentData: any) => {
   tableContainer.innerHTML = "";
   tableContainer.appendChild(table);
 };
-
 
 const getLetterGrade = (grade) => {
   grade = Math.round(grade);
@@ -354,14 +382,29 @@ const getGrade = (assignmentData) => {
   let total = 0;
   let earned = 0;
   for (let assignment of assignmentData) {
-    if (!assignment._assignmentsections[0]._assignmentscores.length) {
+    
+    if (
+      !assignment._assignmentsections[0]._assignmentscores.length ||
+      !assignment._assignmentsections[0]._assignmentscores?.[0]?.hasOwnProperty(
+        "scorepoints"
+      )
+    ) {
       continue;
     }
+
+    console.log(
+      gradeOverrides[assignment._assignmentsections[0].assignmentsectionid]
+    );
+    let scorePoints =
+      gradeOverrides[assignment._assignmentsections[0].assignmentsectionid] ??
+      assignment._assignmentsections[0]._assignmentscores[0]?.scorepoints;
+    console.log(scorePoints);
     total +=
       assignment._assignmentsections[0].scoreentrypoints *
       assignment._assignmentsections[0].weight;
+    console.log('total', total)
     earned +=
-      assignment._assignmentsections[0]._assignmentscores[0]?.scorepoints *
+      scorePoints *
       assignment._assignmentsections[0].weight;
   }
   return (earned / total) * 100;
