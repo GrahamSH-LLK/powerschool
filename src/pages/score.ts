@@ -1,4 +1,4 @@
-import { addStyle, keywordToSubject } from "../utils";
+import { addStyle, autoescaper, keywordToSubject } from "../utils";
 import { format } from "date-fns";
 import styles from "./score.css";
 import tableStyles from "./table.css";
@@ -213,7 +213,7 @@ export default async function () {
     const letterGradeContainer = document.querySelector(".class-lettergrade");
 
     if ((e.target as HTMLSelectElement).value === "All") {
-        letterGradeContainer.innerHTML = `${grade.letterGrade} | ${grade.number}`;
+        letterGradeContainer.innerHTML = autoescaper`${grade.letterGrade} | ${grade.number}`;
       return renderTable(assignmentData);
     }
     let filteredData = assignmentData.filter(
@@ -226,7 +226,7 @@ export default async function () {
 
     const percent = getGrade(filteredData);
     const letterGrade = getLetterGrade(percent);
-    letterGradeContainer.innerHTML = `${
+    letterGradeContainer.innerHTML = autoescaper`${
       (e.target as HTMLSelectElement).value
     }: ${letterGrade} | ${percent.toFixed(0)}%`;
   });
@@ -280,7 +280,7 @@ const renderTable = (assignmentData: any) => {
     );
     const flagString = activeFlags.map((flag) => flags[flag]).join(", ");
     const tr = document.createElement("tr");
-    tr.innerHTML = `
+    tr.innerHTML = autoescaper`
     <td>${format(
       assignment._assignmentsections[0].duedate,
       "MMM dd, yyyy"
