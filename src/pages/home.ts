@@ -2,10 +2,10 @@ import { addStyle, keywordToSubject } from "../utils";
 import styles from "./home.css";
 import table from "./table.css";
 export default () => {
-    addStyle(styles);
-    addStyle(table);
+  addStyle(styles);
+  addStyle(table);
   //document.addEventListener("DOMContentLoaded", async function () {
-  "use strict";
+  ("use strict");
   const timescales = Array.from(
     document
       .querySelector("#quickLookup")
@@ -14,12 +14,14 @@ export default () => {
   )
     .slice(4, 13)
     .map((td) => td.textContent);
-  let currTimescale = timescales[0];
 
+  let currTimescale = timescales[0];
+  let timescaleDates = Array(timescales.length).fill()
+    .map((x) => {return {}});
   const attendanceTable = document.querySelector("#quickLookup  tbody");
-  const attendanceRows = Array.from(attendanceTable.querySelectorAll(
-    "tr:not(.th2):not(:has(#attTotal))"
-  ));
+  const attendanceRows = Array.from(
+    attendanceTable.querySelectorAll("tr:not(.th2):not(:has(#attTotal))")
+  );
 
   const attendanceData = [];
   for (let row of attendanceRows) {
@@ -151,6 +153,11 @@ export default () => {
 
       .map((td) => {
         let link = td.querySelector("a")?.getAttribute("href");
+        let queryParams = new URLSearchParams(link?.split("?")[1]);
+        // get begdate and enddate
+
+        let begDate = queryParams?.get("begdate");
+        let endDate = queryParams?.get("enddate");
 
         if (td.textContent === "[ i ]") {
           return { letterGrade: "", number: "", link };
@@ -167,12 +174,21 @@ export default () => {
           number: split?.[1],
           link,
           textContent: td.innerText,
+          begDate,
+          endDate,
         };
       });
 
     let gradeData = {};
     for (let i = 0; i < timescales.length; i++) {
+      console.log(grades[i]);
       gradeData[timescales[i]] = grades[i];
+
+      timescaleDates[i].begDate =
+        timescaleDates[i].begDate ?? new Date(grades[i].begDate);
+      timescaleDates[i].endDate =
+        timescaleDates[i].endDate ?? new Date(grades[i].endDate);
+   
     }
 
     attendanceData.push({
@@ -190,6 +206,18 @@ export default () => {
   const dropdown = Object.assign(document.createElement("select"), {
     id: "timescale",
   });
+  for (let timescaleDate of timescaleDates) {
+    console.log(timescaleDate);
+    // check if within date range
+    let now = new Date();
+    let begDate = new Date(timescaleDate.begDate);
+    let endDate = new Date(timescaleDate.endDate);
+    if (begDate <= now && now <= endDate) {
+      console.log("found", timescaleDate);
+      currTimescale = timescales[timescaleDates.indexOf(timescaleDate)];
+      break;
+    }
+  }
   for (let timescale of timescales) {
     const option = Object.assign(document.createElement("option"), {
       value: timescale,

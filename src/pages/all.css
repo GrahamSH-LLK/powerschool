@@ -1,7 +1,7 @@
 @import url("/src/assets/inter/inter.css");
 
-.box-round:has(#quickLookup),
-.box-round:has(.linkDescList),
+#content-main > .box-round:has(#quickLookup),
+#content-main > .box-round:has(.linkDescList),
 #legend {
   display: none !important;
 }
